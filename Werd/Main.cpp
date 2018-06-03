@@ -20,7 +20,7 @@ bool ContainsWord(const std::vector<std::string>& vec, const std::string& word)
 	return false;
 }
 
-std::vector<int> fill_buckets(const std::string& word)
+std::vector<int> FillBuckets(const std::string& word)
 {
 	std::vector<int> buckets(26, 0);
 
@@ -32,10 +32,10 @@ std::vector<int> fill_buckets(const std::string& word)
 	return buckets;
 }
 
-int Score(const std::string& target, const std::string& guess)
+int Score(const std::string& word1, const std::string& word2)
 {
-	const std::vector<int> buckets1 = fill_buckets(target);
-	const std::vector<int> buckets2 = fill_buckets(guess);
+	const std::vector<int> buckets1 = FillBuckets(word1);
+	const std::vector<int> buckets2 = FillBuckets(word2);
 
 	int score = 0;
 	for (int i = 0; i < 26; ++i)
@@ -45,7 +45,7 @@ int Score(const std::string& target, const std::string& guess)
 
 	for (int i = 0; i < 5; ++i)
 	{
-		if (target[i] == guess[i])
+		if (word1[i] == word2[i])
 		{
 			++score;
 		}
