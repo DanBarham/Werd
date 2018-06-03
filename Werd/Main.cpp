@@ -54,30 +54,8 @@ int Score(const std::string& target, const std::string& guess)
 	return score;
 }
 
-int main()
+void GameLoop(const std::vector<std::string>& textData)
 {
-	std::vector<std::string> textData;
-
-	{
-		std::ifstream textDataFile("sgb-words.txt");
-		if (!textDataFile)
-		{
-			std::cout << "Couldn't load file! ";
-			std::cin.get();
-			return -1;
-		}
-
-		for (std::string line; std::getline(textDataFile, line); )
-		{
-			if (line.empty())
-			{
-				continue;
-			}
-
-			textData.push_back(line);
-		}
-	}
-
 	std::mt19937 rng(std::random_device{}());
 	std::uniform_int_distribution<int> dist(0, textData.size() - 1);
 	const std::string target = textData[dist(rng)];
@@ -99,7 +77,7 @@ int main()
 		}
 		else if (!ContainsWord(textData, guess))
 		{
-			std::cout << "The internet says that's not a word." << std::endl;
+			std::cout << "The internet says that's not a common word." << std::endl;
 			continue;
 		}
 
@@ -115,6 +93,102 @@ int main()
 			continue;
 		}
 	}
+}
+
+bool VecContains(const std::vector<std::string>& vec, const std::string& value)
+{
+	if (std::find(vec.begin(), vec.end(), value) != vec.end())
+	{
+		return true;
+	}
+
+	return false;
+}
+
+bool FileExists(const std::string& filename)
+{
+    struct stat buf;
+    if (stat(filename.c_str(), &buf) != -1)
+    {
+        return true;
+    }
+    return false;
+}
+
+int main()
+{
+	std::vector<std::string> googleListTextData;
+	std::vector<std::string> sgbTextData;
+
+	if (!FileExists("combinedList.txt"))
+	{
+		std::cout << "One moment, setting up for the first time\n";
+		std::cout << "...\n";
+		{
+			std::ifstream textDataFile("20k.txt");
+			if (!textDataFile)
+			{
+				std::cout << "Couldn't load file! ";
+				std::cin.get();
+				return -1;
+			}
+
+			for (std::string line; std::getline(textDataFile, line); )
+			{
+				if (line.empty() || line.size() != 5)
+				{
+					continue;
+				}
+
+				googleListTextData.push_back(line);
+			}
+			std::cout << "...\n";
+		}
+		{
+			std::ofstream combinedList("combinedList.txt");
+			std::ifstream textDataFile("sgb-words.txt");
+			if (!textDataFile)
+			{
+				std::cout << "Couldn't load file! ";
+				std::cin.get();
+				return -1;
+			}
+
+			for (std::string line; std::getline(textDataFile, line); )
+			{
+				if (line.empty() || !VecContains(googleListTextData, line))
+				{
+					continue;
+				}
+
+				sgbTextData.push_back(line);
+				combinedList << line << '\n';
+			}
+			std::cout << "...\n";
+		}
+	}
+	else
+	{
+		std::ifstream textDataFile("combinedList.txt");
+		if (!textDataFile)
+		{
+			std::cout << "Couldn't load file! ";
+			std::cin.get();
+			return -1;
+		}
+
+		for (std::string line; std::getline(textDataFile, line); )
+		{
+			if (line.empty())
+			{
+				continue;
+			}
+
+			sgbTextData.push_back(line);
+		}
+	}
+
+	GameLoop(sgbTextData);
 
 	std::cin.clear();
 	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
